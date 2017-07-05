@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="../css/move.css" />
+		<script type="text/javascript" src="../js/move.js" ></script>
+		<script>
+		    function lunbo(duixiang,Class){   //封装函数lunbo(要获取谁的,classname);
+		    	var arr = [];  //新建数组arr
+		    	var oLi = duixiang.getElementsByTagName('*');   //获取父元素中的元素集合,因为不知道要获取哪个元素,所以用*代替
+		    	for(var i=0;i<oLi.length;i++){   //便利到每个元素
+		    		if(oLi[i].className==Class){
+		    			arr.push(oLi[i]);
+		    		}
+		    	}
+		    	return arr;
+		    }
+
+		    window.onload = function(){
+		    	var oDiv = document.getElementById('playimages');
+		    	var oPrev = lunbo(oDiv,'prev')[0];
+		    	var oNext = lunbo(oDiv,'next')[0];
+		    	var oLeft = lunbo(oDiv,'mark_left')[0];
+		    	var oRight = lunbo(oDiv,'mark_right')[0];
+		    	oPrev.onmouseover = oLeft.onmouseover = function(){
+		    		startMove(oPrev,'opacity',100);
+		    	}
+		    	oPrev.onmouseout = oLeft.onmouseout = function(){
+		    		startMove(oPrev,'opacity',0);
+		    	}
+		    	oNext.onmouseover = oRight.onmouseover = function(){
+		    		startMove(oNext,'opacity',100);
+		    	}
+		    	oNext.onmouseout = oRight.onmouseout = function(){
+		    		startMove(oNext,'opacity',0);
+		    	}
+
+		    	var oLismallbox = lunbo(oDiv,'small_pic')[0];  //获取小图片父元素
+		    	var oUlsmall = oLismallbox.getElementsByTagName('ul')[0]; //获取小图片父元素
+		    	var oLismall = oLismallbox.getElementsByTagName('li');  //获取小图片元素集合
+		    	var oUl = lunbo(oDiv,'big_pic')[0];  //获取大图片父元素
+		    	var oLibig = oUl.getElementsByTagName('li');  //获取大图片元素集合
+		    	var nowindex = 2; //表示z-index值
+		    	var now = 0;   //等下判断当前索引值是否等于now
+		    	for(var i=0;i<oLismall.length;i++){   //便利每一个小图片(li)
+		    		oLismall[i].index = i;   //给每个li加索引,index = i;
+		    		oLismall[i].onclick = function(){   //给每个li添加点击事件
+		    			if(this.index==now){  //判断当前索引值是否等于now,如果不等于就返回,再就给now赋值为当前index值
+		    				return;
+		    			}else{
+		    				now = this.index;
+		    			}
+		    			tab();
+		    		}
+		    		oLismall[i].onmouseover = function(){  //每一个li添加移入事件
+		    			startMove(this,'opacity',100);
+		    		}
+		    		oLismall[i].onmouseout = function(){  //每一个li添加移出事件
+		    			if(this.index!=now){
+		    				startMove(this,'opacity',60);
+		    			}
+		    		}
+		    	}
+		    	//
+		    	oUlsmall.style.width = oLismall[0].offsetWidth*oLismall.length + 'px';
+
+		    	//把for中的模块提取出来,封装成独立函数
+		    	function tab(){
+		    			//图片缓冲
+		    			oLibig[now].style.zIndex = nowindex++;
+		    			oLibig[now].style.height = 0;
+		    			startMove(oLibig[now],'height',320);
+		    			for(var i=0;i<oLismall.length;i++){
+		    				startMove(oLismall[i],'opacity',60);
+		    			}
+		    			startMove(oLismall[now],'opacity',100);
+		    			//判断当前显示的图片为第几张,当为第一张的时候,ul的左边距设为0
+		    			if(now==0){
+				    		startMove(oUlsmall,'left',0);
+				    	}else if(now==oLismall.length-1){  //当为最后一张时
+				    		startMove(oUlsmall,'left',-3*oLismall[0].offsetWidth); //让倒数第一张的位置等于倒数第二张的位置,也就是让ul移动的距离等于倒数第二张显示时移动的距离.
+				    	}else{
+				    		startMove(oUlsmall,'left',-(now-1)*oLismall[0].offsetWidth); //这个就是当前图片不是第一张也不是最后一张,ul正常向左移动
+				    	}
+		    		}
+		    	oPrev.onclick = function(){
+		    		now--;
+		    		if(now==-1){
+		    			now = oLismall.length-1;
+		    		}
+		    		tab();
+		    	}
+		    	oNext.onclick = function(){
+		    		now++;
+		    		if(now==oLismall.length){
+		    			now=0;
+		    		}
+		    		tab();
+		    	}
+		    	var timer = setInterval(oNext.onclick,2000);  //定义定时器
+		    	oDiv.onmouseover = function(){ clearInterval(timer);}  //oDiv添加移入事件,关闭定时器
+		    	oDiv.onmouseout = function(){ timer = setInterval(oNext.onclick,2000);}   //oDiv添加鼠标移出事件,重启定时器
+
+		    }
+		</script>
+	</head>
+	<body>
+
+		<div id="playimages" class="play">
+    <ul class="big_pic">
+        <!--轮播上淡入淡出的左右按钮，因为透明度为0所以暂时看不到-->
+		<div class="prev"></div>
+		<div class="next"></div>
+		<!--为了能以最简单的方式选出左右按钮，所以加了两个a用来分隔左右两部分-->
+		<a class="mark_left" href="javascript:;"></a>
+		<a class="mark_right" href="javascript:;"></a>
+		<!--<div class="bg"></div>-->
+
+        <li style="z-index:1;"><img src="../img/1.jpg" /></li>
+        <li><img src="../img/2.jpg" /></li>
+        <li><img src="../img/3.jpg" /></li>
+        <li><img src="../img/4.jpg" /></li>
+        <li><img src="../img/5.jpg" /></li>
+        <li><img src="../img/6.jpg" /></li>
+    </ul>
+    <div class="small_pic">
+        <ul style="width:390px; position: absolute; top: 0; left: 0;">
+            <li style="filter: 100; opacity: 1;"><img src="../img/1.jpg" /></li>
+            <li><img src="../img/2.jpg" /></li>
+            <li><img src="../img/3.jpg" /></li>
+            <li><img src="../img/4.jpg" /></li>
+            <li><img src="../img/5.jpg" /></li>
+            <li><img src="../img/6.jpg" /></li>
+        </ul>
+    </div>
+</div>
+	</body>
+</html>
